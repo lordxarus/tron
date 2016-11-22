@@ -12,11 +12,12 @@ fun main(args: Array<String>) {
     var board = Board()
 
     frame.add(board)
+    frame.addKeyListener(board)
     frame.size = Dimension(800, 600)
     frame.isVisible = true
 
     while (true) {
-        board.repaint()
-        Thread.sleep(1000)
+        if (board.running) board.update()
+        Thread.sleep(50)
     }
 }
