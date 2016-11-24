@@ -18,29 +18,36 @@ class Board: JPanel(), KeyListener {
 
     var board = Array(4096, {i -> BoardConsts.SPACE})
     val boardWidth = 64
-    var dir = LEFT
+    var players = hashMapOf(Pair(RED, LEFT), Pair(BLUE, LEFT), Pair(GREEN, LEFT), Pair(ORANGE, LEFT))
     var running = true
 
     init {
         board.set2d(6, 6, boardWidth, RED)
+        board.set2d(10, 10, boardWidth, BLUE)
+        board.set2d(14, 14, boardWidth, GREEN)
+        board.set2d(18, 18, boardWidth, ORANGE)
     }
 
     fun update() {
-        var index : Int = 0
-        board.forEachIndexed { i, data ->
-            if (data == RED) {
-                val x = i % boardWidth
-                val y = i / boardWidth
-                board[i] = RED_STREAK
-                index = (y + dir.direction.second) * boardWidth + (x + dir.direction.first)
+        var deadPlayers = arrayListOf<BoardConsts>()
+        players.forEach { color, dir ->
+            var index : Int = 0
+            board.forEachIndexed { i, data ->
+                if (data == color) {
+                    val x = i % boardWidth
+                    val y = i / boardWidth
+                    board[i] = getStreak(color)
+                    index = (y + dir.direction.second) * boardWidth + (x + dir.direction.first)
+                }
             }
+            if (board[index] == SPACE) {
+                board[index] = color
+            } else {
+                deadPlayers.add(color)
+            }
+            repaint()
         }
-        if (board[index] != RED_STREAK) {
-            board[index] = RED
-        } else {
-            running = false
-        }
-        repaint()
+        deadPlayers.forEach { player -> players.remove(player) }
     }
 
     override fun paintComponent(g: Graphics) {
@@ -50,8 +57,11 @@ class Board: JPanel(), KeyListener {
                 RED -> g.color = Color.RED
                 RED_STREAK -> g.color = Color.RED
                 BLUE -> g.color = Color.BLUE
+                BLUE_STREAK -> g.color = Color.BLUE
                 GREEN -> g.color = Color.GREEN
+                GREEN_STREAK -> g.color = Color.GREEN
                 ORANGE -> g.color = Color.ORANGE
+                ORANGE_STREAK -> g.color = Color.ORANGE
             }
             g.fillRect(((i % boardWidth) * 16) - 16, ((i / boardWidth) * 16) - 16, 16, 16)
         }
@@ -74,22 +84,30 @@ class Board: JPanel(), KeyListener {
     override fun keyPressed(keyEvent: KeyEvent?) {
 
         if (keyEvent?.keyCode == KeyEvent.VK_SPACE) {
-            board = Array(4096, {i -> BoardConsts.SPACE})
-            board.set2d(5, 5, boardWidth, RED)
-            running = true
-            repaint()
+            reset()
         }
 
         when(keyEvent?.keyCode) {
-            KeyEvent.VK_UP -> if (dir != DOWN) dir = UP
-            KeyEvent.VK_DOWN -> if (dir != UP) dir = DOWN
-            KeyEvent.VK_LEFT -> if (dir != RIGHT) dir = LEFT
-            KeyEvent.VK_RIGHT -> if (dir != LEFT) dir = RIGHT
+            KeyEvent.VK_UP -> if (players.get(RED) != DOWN) players.set(RED, UP)
+            KeyEvent.VK_DOWN -> if (players.get(RED) != UP) players.set(RED, DOWN)
+            KeyEvent.VK_LEFT -> if (players.get(RED) != RIGHT) players.set(RED, LEFT)
+            KeyEvent.VK_RIGHT -> if (players.get(RED) != LEFT) players.set(RED, RIGHT)
         }
     }
 
     override fun keyReleased(p0: KeyEvent?) {
 //        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    fun reset() {
+        board = Array(4096, {i -> BoardConsts.SPACE})
+        board.set2d(6, 6, boardWidth, RED)
+        board.set2d(10, 10, boardWidth, BLUE)
+        board.set2d(14, 14, boardWidth, GREEN)
+        board.set2d(18, 18, boardWidth, ORANGE)
+        players = hashMapOf(Pair(RED, LEFT), Pair(BLUE, LEFT), Pair(GREEN, LEFT), Pair(ORANGE, LEFT))
+        running = true
+        repaint()
     }
 
 }
