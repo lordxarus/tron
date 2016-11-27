@@ -1,11 +1,14 @@
 package com.lordxarus.tron
 
 import java.awt.Dimension
+import java.util.*
 import javax.swing.JFrame
 
 /**
  * Created by jeremy on 11/20/16.
  */
+
+val rand = Random()
 
 fun main(args: Array<String>) {
     var frame = JFrame()
@@ -18,6 +21,6 @@ fun main(args: Array<String>) {
 
     while (true) {
         if (board.running) board.update()
-        Thread.sleep(50)
+        Thread.sleep(35)
     }
 }

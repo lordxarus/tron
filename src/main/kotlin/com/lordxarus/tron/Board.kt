@@ -10,40 +10,85 @@ import javax.swing.JPanel
 import com.lordxarus.tron.BoardConsts.*
 import com.lordxarus.tron.Direction.*
 import java.awt.Color
+import java.awt.Component
 
 /**
- * Created by jeremy on 11/20/16.
+ * Created by jeremy on 11/20/squareSize.
  */
 class Board: JPanel(), KeyListener {
 
     var board = Array(4096, {i -> BoardConsts.SPACE})
     val boardWidth = 64
-    var players = hashMapOf(Pair(RED, LEFT), Pair(BLUE, LEFT), Pair(GREEN, LEFT), Pair(ORANGE, LEFT))
+    val squareSize = 4
+    var players = hashMapOf(Pair(RED, getDirection(rand.nextInt(3))), Pair(BLUE, getDirection(rand.nextInt(3))), Pair(GREEN, getDirection(rand.nextInt(3))), Pair(ORANGE, getDirection(rand.nextInt(3))))
     var running = true
 
     init {
-        board.set2d(6, 6, boardWidth, RED)
-        board.set2d(10, 10, boardWidth, BLUE)
-        board.set2d(14, 14, boardWidth, GREEN)
-        board.set2d(18, 18, boardWidth, ORANGE)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, RED)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, BLUE)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, GREEN)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, ORANGE)
     }
 
+    /**
+     * Manipulates the board array with direction vectors stored in players
+     * **/
     fun update() {
-        var deadPlayers = arrayListOf<BoardConsts>()
+        val deadPlayers = arrayListOf<BoardConsts>()
+
+        // Massively inefficient (store player location instead of iterating over the board)
+        players.forEach { player, dir ->
+            if (player != RED) {
+                var run = true
+                for (i in 0..3) {
+                    if (run) {
+                        val candidateDir = getDirection(i)
+                        board.forEachIndexed { i, data ->
+                            if (data == player) {
+                                val x = i % boardWidth
+                                val y = i / boardWidth
+                                val index = (y + candidateDir.direction.second) * boardWidth + (x + candidateDir.direction.first)
+                                if (index >= 0 && index < board.size) {
+                                    if (board[index] == SPACE) {
+                                        players.set(player, candidateDir)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         players.forEach { color, dir ->
             var index : Int = 0
             board.forEachIndexed { i, data ->
                 if (data == color) {
-                    val x = i % boardWidth
-                    val y = i / boardWidth
+                    var x = i % boardWidth
+                    var y = i / boardWidth
+
+                    // By nature of the 2d array the horizontal axis wraps naturally but not the vertical
+                    if (y == 0 && dir == UP) {
+                        y = boardWidth
+                        x -= 1
+                    }
+                    if (y == boardWidth - 1 && dir == DOWN) {
+                        y = 0
+                        x += 1
+                    }
+
+                    // Set the previous position to streak
                     board[i] = getStreak(color)
+                    // Get the index of the new position of the player
                     index = (y + dir.direction.second) * boardWidth + (x + dir.direction.first)
                 }
             }
-            if (board[index] == SPACE) {
-                board[index] = color
-            } else {
-                deadPlayers.add(color)
+            if (index < board.size && index > 0) {
+                if (board[index] == SPACE) {
+                    board[index] = color
+                } else {
+                    deadPlayers.add(color)
+                }
             }
             repaint()
         }
@@ -63,17 +108,19 @@ class Board: JPanel(), KeyListener {
                 ORANGE -> g.color = Color.ORANGE
                 ORANGE_STREAK -> g.color = Color.ORANGE
             }
-            g.fillRect(((i % boardWidth) * 16) - 16, ((i / boardWidth) * 16) - 16, 16, 16)
+            val x = i % boardWidth
+            val y = i / boardWidth
+            g.fillRect(((x) * squareSize) - squareSize, ((y) * squareSize) - squareSize, squareSize, squareSize)
         }
 
-        g.color = Color.BLACK
+/*        g.color = Color.BLACK
         for (i in 0..63) {
-            g.drawLine(i * 16, 0, i * 16, this.height)
+            g.drawLine(i * squareSize, 0, i * squareSize, this.height)
         }
 
         for (i in 0..63) {
-            g.drawLine(0, i * 16, this.width, i * 16)
-        }
+            g.drawLine(0, i * squareSize, this.width, i * squareSize)
+        }*/
 
     }
 
@@ -101,11 +148,11 @@ class Board: JPanel(), KeyListener {
 
     fun reset() {
         board = Array(4096, {i -> BoardConsts.SPACE})
-        board.set2d(6, 6, boardWidth, RED)
-        board.set2d(10, 10, boardWidth, BLUE)
-        board.set2d(14, 14, boardWidth, GREEN)
-        board.set2d(18, 18, boardWidth, ORANGE)
-        players = hashMapOf(Pair(RED, LEFT), Pair(BLUE, LEFT), Pair(GREEN, LEFT), Pair(ORANGE, LEFT))
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, RED)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, BLUE)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, GREEN)
+        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, ORANGE)
+        players = hashMapOf(Pair(RED, getDirection(rand.nextInt(3))), Pair(BLUE, getDirection(rand.nextInt(3))), Pair(GREEN, getDirection(rand.nextInt(3))), Pair(ORANGE, getDirection(rand.nextInt(3))))
         running = true
         repaint()
     }
