@@ -17,47 +17,26 @@ import java.awt.Component
  */
 class Board: JPanel(), KeyListener {
 
-    var board = Array(4096, {i -> BoardConsts.SPACE})
-    val boardWidth = 64
+    var board = Array(16384, {i -> BoardConsts.SPACE})
+    val boardWidth = 128
     val squareSize = 4
-    var players = hashMapOf(Pair(RED, getDirection(rand.nextInt(3))), Pair(BLUE, getDirection(rand.nextInt(3))), Pair(GREEN, getDirection(rand.nextInt(3))), Pair(ORANGE, getDirection(rand.nextInt(3))))
+    lateinit var players : HashMap<BoardConsts, Direction>
     var running = true
 
     init {
-        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, RED)
-        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, BLUE)
-        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, GREEN)
-        board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, ORANGE)
+        reset()
     }
 
     /**
      * Manipulates the board array with direction vectors stored in players
+     * as well as getting the next move for the AI players
      * **/
     fun update() {
         val deadPlayers = arrayListOf<BoardConsts>()
 
         // Massively inefficient (store player location instead of iterating over the board)
-        players.forEach { player, dir ->
-            if (player != RED) {
-                var run = true
-                for (i in 0..3) {
-                    if (run) {
-                        val candidateDir = getDirection(i)
-                        board.forEachIndexed { i, data ->
-                            if (data == player) {
-                                val x = i % boardWidth
-                                val y = i / boardWidth
-                                val index = (y + candidateDir.direction.second) * boardWidth + (x + candidateDir.direction.first)
-                                if (index >= 0 && index < board.size) {
-                                    if (board[index] == SPACE) {
-                                        players.set(player, candidateDir)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        players.forEach { player, direction ->
+            if (player != RED) players.set(player, AI.getMove(board, player, boardWidth))
         }
 
         players.forEach { color, dir ->
@@ -96,6 +75,7 @@ class Board: JPanel(), KeyListener {
     }
 
     override fun paintComponent(g: Graphics) {
+        // Render players
         board.forEachIndexed { i, data ->
             g.color = Color.WHITE
             when (data) {
@@ -112,6 +92,7 @@ class Board: JPanel(), KeyListener {
             val y = i / boardWidth
             g.fillRect(((x) * squareSize) - squareSize, ((y) * squareSize) - squareSize, squareSize, squareSize)
         }
+        // Grid
 
 /*        g.color = Color.BLACK
         for (i in 0..63) {
@@ -121,10 +102,6 @@ class Board: JPanel(), KeyListener {
         for (i in 0..63) {
             g.drawLine(0, i * squareSize, this.width, i * squareSize)
         }*/
-
-    }
-
-    override fun keyTyped(keyEvent: KeyEvent?) {
 
     }
 
@@ -142,12 +119,11 @@ class Board: JPanel(), KeyListener {
         }
     }
 
-    override fun keyReleased(p0: KeyEvent?) {
-//        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun keyTyped(keyEvent: KeyEvent?) {}
+    override fun keyReleased(p0: KeyEvent?) {}
 
     fun reset() {
-        board = Array(4096, {i -> BoardConsts.SPACE})
+        board = Array(board.size, {i -> BoardConsts.SPACE})
         board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, RED)
         board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, BLUE)
         board.set2d(rand.nextInt(boardWidth), rand.nextInt(boardWidth), boardWidth, GREEN)
