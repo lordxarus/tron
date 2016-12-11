@@ -1,3 +1,11 @@
 language: java
 jdk:
-  - oraclejdk8
+- oraclejdk8
+script: "./gradlew shadowJar"
+deploy:
+  provider: releases
+  api_key:
+    secure: Vr1YFZcp9OYqUNvyJav3EYCGBDmYgOK06JFKu16GXzn3VGsJI7GKdtKp07OjlTS0jTndBHZ0ozZqady3VWu7WnegiArOxMN6VCxE/Yh2pWEUkX0KDqaL3xD8pt9biDpS5fh9O9n/9itfusjXPng8+Tr3NSbqZoDYXnPC1pyDgAk1DJe6Vs+8gcRs/SSvq6exapRLvc2QttHHFDRgvVxkGy1C1C/vZzBCXeByZ5Y0gxGHcqV2EsLjFkDVcW3b3HIMQ9cWUJeFi8jM/LtZm9KNwUym8p0cCwcUlMdTLRl+v3HpPDx++h6ZYdvs374VmvhLy6TcbDl6a6zJvCzCnKxA0JX45d2THJz2PNGaR134EqSXZVZqIVxV0UI4iMC44JUbVmasvKJeG1FFmFMNjSTk9eGxkg1ijRGuUbQIpRYh20CYRgqdyNV0RsvDlVQpT9IY1kQWLCy3rKEQKRcL1HO0utdcfv3RqKPAJ1Tqdek5cIYYxqhWib/jTSdKVKy3/CxlPUkAt3muYa3P6lPGxj+74ckV+DG4gQPwc2NuuVFXynbBP893B5Ymw9zgNLPoAPWxpLP1h7zCCyTIztzCfJbA5x81wRNh6uYS3gue9+UNsba+GDwggG6Ihmb3q3iPllJYz/B4id8XI8VcFd41FaTK9XMWyYbAkCNP3F7DMe8Y4z4=
+  file: "$TRAVIS_BUILD_DIR/build/libs/*"
+  on:
+    repo: lordxarus/tron
