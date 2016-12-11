@@ -10,3 +10,4 @@ deploy:
   file: "$TRAVIS_BUILD_DIR/build/libs/*"
   on:
     repo: lordxarus/tron
+    tags: true
